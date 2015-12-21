@@ -6,12 +6,12 @@ Note: The data is not checked into the repository currently since a license is r
 
 ## Overview
 
-|Data:     |The Penn Treebank Project (https://www.cis.upenn.edu/~treebank/) annotates naturally-occuring text for linguistic structure .
+|Data      |The Penn Treebank Project (https://www.cis.upenn.edu/~treebank/) annotates naturally-occuring text for linguistic structure .
 |:---------|:---|
-|Purpose:  |Showcase how to train a recurrent network for text data.
-|Network:  |SimpleNetworkBuilder for recurrent network with two hidden layers.
-|Training: |Stochastic gradient descent with adjusted learning rate.
-|Comments: |The provided configuration file performs class based RNN training.
+|Purpose   |Showcase how to train a recurrent network for text data.
+|Network   |SimpleNetworkBuilder for recurrent network with two hidden layers.
+|Training  |Stochastic gradient descent with adjusted learning rate.
+|Comments  |The provided configuration file performs class based RNN training.
 
 ## Running the example
 
