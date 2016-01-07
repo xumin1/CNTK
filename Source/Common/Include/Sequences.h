@@ -145,6 +145,12 @@ namespace Microsoft { namespace MSR { namespace CNTK {
 
         const Matrix<char> & GetColumnsValidityMask(DEVICEID_TYPE deviceId) const;
 
+#if 0   // in the future we can use the tensor lib to implement this
+        template<class ElemType> const Matrix<ElemType> GetColumnsValidMask() const;
+        template<> const Matrix<float> GetColumnsValidMask<float>() const { return m_distanceToStart.Reshaped(1, m_distanceToStart.GetNumElements()); }
+        template<> const Matrix<double> GetColumnsValidMask<double>() const { NOT_IMPLEMENTED; }
+#endif
+
         // compare whether two layouts are the same
         bool operator==(const MBLayout & other) const
         {
@@ -190,7 +196,7 @@ namespace Microsoft { namespace MSR { namespace CNTK {
                 LogicError("AddSequence: Sequence added to an MBLayout must overlap with minibatch.");
 
             // remember it
-#ifdef _DEBUG
+#if 0//def _DEBUG
             auto cap = m_sequences.capacity();  // Some sanity check for debugging a speed regression. This should only show up during the first minibatches, and growing only.
             m_sequences.push_back(seqDesc);
             if (cap != m_sequences.capacity())
@@ -801,10 +807,17 @@ namespace Microsoft { namespace MSR { namespace CNTK {
     {
         if (pMBLayout && pMBLayout->HasGaps(fr))
         {
+#if 0       // in the future we can use the tensor lib to implement this
+            const auto & maskMatrix = pMBLayout->GetColumnsValidMask<ElemType>();
+            auto maskSlice          = DataWithMBLayoutFor(maskMatrix,   fr, pMBLayout);
+            auto matrixSliceToMask  = DataWithMBLayoutFor(matrixToMask, fr, pMBLayout);
+            TensorView<ElemType>(matrixSliceToMask).DoMaskNegativeOf(0, TensorView<ElemType>(matrixSliceToMask), TensorView<ElemType>(maskSlice), 1); val;
+#else
             const auto & maskMatrix = pMBLayout->GetColumnsValidityMask(matrixToMask.GetDeviceId());
             auto maskSlice          = DataWithMBLayoutFor(maskMatrix,   fr, pMBLayout);
             auto matrixSliceToMask  = DataWithMBLayoutFor(matrixToMask, fr, pMBLayout);
             matrixSliceToMask.MaskColumnsValue(maskSlice, val);
+#endif
         }
     }
 

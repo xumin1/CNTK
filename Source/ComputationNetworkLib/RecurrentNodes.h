@@ -5,6 +5,11 @@
 //
 #pragma once
 
+#include "Basics.h"
+#include "Matrix.h"
+#include "TensorShape.h"
+#include "ComputationNode.h"
+
 #include <unordered_set>
 #include <map>
 #include <string>
@@ -17,10 +22,6 @@
 #include <atomic>
 #include <sstream>
 #include <iostream>
-
-#include "Basics.h"
-#include "Matrix.h"
-#include "ComputationNode.h"
 
 namespace Microsoft { namespace MSR { namespace CNTK {
 
@@ -86,33 +87,31 @@ namespace Microsoft { namespace MSR { namespace CNTK {
         typedef std::shared_ptr<DelayedValueNodeState<ElemType>> DelayedNodeStatePtr; 
         static const std::wstring TypeName() { return L"DelayedValue"; }
     private:
-        void Init(size_t row_size, size_t col_size, ElemType initialActivationValue = (ElemType)DEFAULT_HIDDEN_ACTIVATION)
+        void Init(const TensorShape & sampleLayout, ElemType initialActivationValue)
         {
             m_initialActivationValue = initialActivationValue;
             m_timeStep = 1;
             CreateMatrixIfNull(m_value);
-            SetDims(row_size, col_size);
-            m_isHistoryCarryOverManagedExternally = false;      // used for PairNetworkNode/PastValueNode combination
+            SetDims(sampleLayout, 0);              // TODO: needed? Can we not infer it? How about setting a sample layout?
+            m_isHistoryCarryOverManagedExternally = false;      // used for PairNetworkNode/PastValueNode combination, which is deprecated
+            m_value->SetValue(m_initialActivationValue);        // is this needed?
         }
     protected:
         DelayedValueNodeBase(DEVICEID_TYPE deviceId, const wstring & name) :
             Base(deviceId, name),
             m_delayedActivation(deviceId)
         {
-            Init(1, 1);
+            Init(TensorShape(), (ElemType)DEFAULT_HIDDEN_ACTIVATION);
         }
-        DelayedValueNodeBase(DEVICEID_TYPE deviceId, const wstring & name, ElemType initialActivationValue, size_t row_size, size_t col_size, size_t timeStep) :
+        DelayedValueNodeBase(DEVICEID_TYPE deviceId, const wstring & name, ElemType initialActivationValue, const TensorShape & sampleLayout, size_t timeStep) :
             Base(deviceId, name),
             m_delayedActivation(deviceId)
         {
-            Init(row_size, col_size, initialActivationValue);
-
-            m_timeStep = (int)timeStep;
-
-            m_value->SetValue(m_initialActivationValue);
+            Init(sampleLayout, initialActivationValue);
+            m_timeStep = (int)timeStep; // TODO: pass this to Init() instead as well
         }
         DelayedValueNodeBase(const ScriptableObjects::IConfigRecordPtr configp) :
-            DelayedValueNodeBase(configp->Get(L"deviceId"), L"<placeholder>", configp->Get(L"defaultHiddenActivation"), configp->Get(L"rows"), configp->Get(L"cols"), configp->Get(L"timeStep"))
+            DelayedValueNodeBase(configp->Get(L"deviceId"), L"<placeholder>", configp->Get(L"defaultHiddenActivation"), configp->Get(L"shape"), configp->Get(L"timeStep"))
         {
             // We do NOT attach the inputs, as we cannot resolve them without causing a circular reference.
             // Instead, we capture them in a lambda, which will be called by ComputationNetwork during the build process through LateAttachInputs() below.
@@ -149,7 +148,7 @@ namespace Microsoft { namespace MSR { namespace CNTK {
             fstream >> rows >> cols;
 
             // Note: Do we need load cols for delay node? I just set to zero to see if there is any problem.
-            SetDims(rows, 0);
+            SetDims(TensorShape(rows), 0);          // tensor shape will be overwritten in Validate()  --TODO: We should serialize it here.
             m_delayedActivation.Resize(rows, 0);    // Note: If we try to access history in first minibatch, we shall crash. It would be a consequence of a missing sentence-begin flag
 
             if (modelVersion >= CNTK_MODEL_VERSION_2)
@@ -276,7 +275,7 @@ namespace Microsoft { namespace MSR { namespace CNTK {
             return false;
         }
 
-        virtual bool InputUsedInComputingInputNodesGradients(size_t childIndex) const
+        virtual bool InputUsedInComputingInputNodesGradients(size_t childIndex) const override
         {
             // The DelayedValueNode does not require any of it's input's values for computing
             // the gradients of its input nodes
@@ -593,8 +592,11 @@ namespace Microsoft { namespace MSR { namespace CNTK {
         PastValueNode(DEVICEID_TYPE deviceId, const wstring & name) :
             Base(deviceId, name)
         { }
-        PastValueNode(DEVICEID_TYPE deviceId, const wstring & name, ElemType initialActivationValue, size_t row_size, size_t col_size, size_t timeStep) :
-            Base(deviceId, name, initialActivationValue, row_size, col_size, timeStep)
+        PastValueNode(DEVICEID_TYPE deviceId, const wstring & name, ElemType initialActivationValue, const TensorShape & sampleLayout, size_t timeStep) :
+            Base(deviceId, name, initialActivationValue, sampleLayout, timeStep)
+        { }
+        PastValueNode(DEVICEID_TYPE deviceId, const wstring & name, ElemType initialActivationValue, size_t numRows, size_t timeStep) :
+            PastValueNode(deviceId, name, initialActivationValue, TensorShape(numRows), timeStep)
         { }
         PastValueNode(const ScriptableObjects::IConfigRecordPtr configp) :
             Base(configp)
@@ -619,8 +621,11 @@ namespace Microsoft { namespace MSR { namespace CNTK {
         FutureValueNode(DEVICEID_TYPE deviceId, const wstring & name) :
             Base(deviceId, name)
         { }
-        FutureValueNode(DEVICEID_TYPE deviceId, const wstring & name, ElemType initialActivationValue, size_t row_size, size_t col_size, size_t timeStep) :
-            Base(deviceId, name, initialActivationValue, row_size, col_size, timeStep)
+        FutureValueNode(DEVICEID_TYPE deviceId, const wstring & name, ElemType initialActivationValue, const TensorShape & sampleLayout, size_t timeStep) :
+            Base(deviceId, name, initialActivationValue, sampleLayout, timeStep)
+        { }
+        FutureValueNode(DEVICEID_TYPE deviceId, const wstring & name, ElemType initialActivationValue, size_t numRows, size_t timeStep) :
+            FutureValueNode(deviceId, name, initialActivationValue, TensorShape(numRows), timeStep)
         { }
         FutureValueNode(const ScriptableObjects::IConfigRecordPtr configp) :
             Base(configp)
