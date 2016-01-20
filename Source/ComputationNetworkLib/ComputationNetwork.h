@@ -976,7 +976,7 @@ private:
     MatrixPool m_matrixPool;
 };
 typedef ComputationNetwork::ComputationNetworkPtr ComputationNetworkPtr;
-
+template class Matrix<double>;
 // TODOs:
 //  - automatic inference of time window w.r.t. delay nodes (and related nodes such as a temporal pooling)
 //  - have overrides of RuntimeError etc. in ComputationNode, which prepend the error string with the node name and operation
