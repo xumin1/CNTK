@@ -2,7 +2,11 @@
 
 ## License
 
-Note: The data is not checked into the repository currently since a license is required for the penn treebank data.
+CNTK distribution contains a subset of the data of The Penn Treebank Project (https://www.cis.upenn.edu/~treebank/):
+
+Marcus, Mitchell, Beatrice Santorini, and Mary Ann Marcinkiewicz. Treebank-2 LDC95T7. Web Download. Philadelphia: Linguistic Data Consortium, 1995.
+
+See License.md in the root level folder of the CNTK repository for full license information.
 
 ## Overview
 
@@ -17,8 +21,7 @@ Note: The data is not checked into the repository currently since a license is r
 
 ### Getting the data
 
-The data is not checked into the repository currently since a license is required for the penn treebank data.
-Please visit https://www.cis.upenn.edu/~treebank/
+The data for this example is already contained in the folder PennTreebank/Data/.
 
 ### Setup
 
