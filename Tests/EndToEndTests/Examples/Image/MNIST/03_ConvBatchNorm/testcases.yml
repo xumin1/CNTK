@@ -2,7 +2,6 @@ dataDir: ../../../../Image/Data
 
 tags:
      # TODO: create new leg for Example-related e2e tests?
-     # running on every nightly job in Debug only:
      - examples (flavor=='debug')
 
 testCases:

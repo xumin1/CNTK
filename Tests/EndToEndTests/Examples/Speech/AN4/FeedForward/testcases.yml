@@ -1,8 +1,8 @@
-dataDir: ../../../../Image/Data
+dataDir: ../../../../../../Examples/Speech/AN4/Data
 
 tags:
      # TODO: create new leg for Example-related e2e tests?
-     - examples (flavor=='release')
+     - examples (flavor=='release') and (build_sku == '1bitsgd')
 
 testCases:
   CNTK Run must be completed:

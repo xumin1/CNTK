@@ -1,8 +1,8 @@
-dataDir: ../../../../Image/Data
+dataDir: ../../../../../../Examples/Other/Simple2d/Data
 
 tags:
      # TODO: create new leg for Example-related e2e tests?
-     - examples (flavor=='release')
+     - examples (flavor=='debug') and (device=='gpu') and (build_sku == '1bitsgd')
 
 testCases:
   CNTK Run must be completed:

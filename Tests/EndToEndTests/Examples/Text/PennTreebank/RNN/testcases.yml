@@ -1,8 +1,8 @@
-dataDir: ../../../../Image/Data
+dataDir: ../../../../../../Examples/Text/PennTreebank/Data
 
 tags:
      # TODO: create new leg for Example-related e2e tests?
-     - examples (flavor=='release')
+     - examples (flavor=='release') and (device=='gpu')
 
 testCases:
   CNTK Run must be completed:

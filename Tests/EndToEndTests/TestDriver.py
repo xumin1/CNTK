@@ -544,6 +544,8 @@ def runCommand(args):
   if len(args.test) > 0:
      testsToRun = []
      for name in args.test:
+       if name[len(name)-1] == '/':
+         name = name[:-1]
        if name.lower() in Test.allTestsIndexedByFullName:
          testsToRun.append(Test.allTestsIndexedByFullName[name.lower()])
        else:
